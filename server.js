@@ -254,7 +254,13 @@ createServer(async (req, res) => {
     res.writeHead(500, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ feil: feil.message }));
   }
-}).listen(PORT, "127.0.0.1", () => {
+})
+  .on("error", (feil) => {
+    if (feil.code !== "EADDRINUSE") throw feil;
+    console.error(`\n  Port ${PORT} er opptatt. Stopp det som kjører der, eller velg en annen: PORT=3334 npm start\n`);
+    process.exit(1);
+  })
+  .listen(PORT, "127.0.0.1", () => {
   console.log(`\n  ☕ Kafé Kos er åpen på http://localhost:${PORT}\n`);
   sorgForOppsett().catch((feil) => console.error("  ✗ Oppsettet feilet:", feil.message));
 });
