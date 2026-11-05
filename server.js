@@ -12,14 +12,15 @@ import { readFile } from "node:fs/promises";
 import QRCode from "qrcode";
 
 const STUDIO = (process.env.EIDAS_STUDIO_URL ?? "").replace(/\/$/, "");
-const CLIENT_ID = process.env.EIDAS_CLIENT_ID ?? "";
-const CLIENT_SECRET = process.env.EIDAS_CLIENT_SECRET ?? "";
+// Navnene Bevisstudio gir deg med «Kopier som miljøvariabler». EIDAS_-navnene virker også.
+const CLIENT_ID = process.env.CLIENT_ID ?? process.env.EIDAS_CLIENT_ID ?? "";
+const CLIENT_SECRET = process.env.CLIENT_SECRET ?? process.env.EIDAS_CLIENT_SECRET ?? "";
 const PORT = Number(process.env.PORT ?? 3333);
 // Lommeboka gjestene bruker. Bare til lenkene på siden — appen kaller den aldri.
 const LOMMEBOK = (process.env.EIDAS_WALLET_URL ?? "https://wallet.kantega.id").replace(/\/$/, "");
 
 if (!STUDIO || !CLIENT_ID || !CLIENT_SECRET) {
-  console.error("\n  Mangler nøklene. Kopier .env.example til .env og fyll inn de tre verdiene.\n");
+  console.error("\n  Mangler nøklene. Kopier .env.example til .env og lim inn CLIENT_ID og CLIENT_SECRET fra Bevisstudio.\n");
   process.exit(1);
 }
 

@@ -28,16 +28,27 @@ git clone https://github.com/kantega/bevisstudio-starter.git
 cd bevisstudio-starter
 ```
 
-**1. Lag en integrasjonsklient.** Logg inn på [ny.bevisstudio.no](https://ny.bevisstudio.no).
-Registrer en organisasjon hvis du ikke har en. Bytt til **avansert visning** nederst i menyen, og
-velg **Integrasjonsklienter → Ny integrasjonsklient**. Formålet er **«Test og utvikling»**.
-Hemmeligheten vises bare én gang, så kopier den med en gang.
+**1. Hent nøklene i Bevisstudio.**
 
-**2. Legg nøklene i `.env`.**
+1. Logg inn på [ny.bevisstudio.no](https://ny.bevisstudio.no). Registrer en organisasjon hvis du
+   ikke har en.
+2. Velg **Avansert visning** nederst i menyen. Uten den får ikke klienten sjekke bevis.
+3. Gå til **Integrasjonsklienter**, og trykk **Lag integrasjonsklient**.
+4. Velg formålet **Test og utvikling**, og trykk **Neste** gjennom tilgangene.
+5. Gi klienten et navn, for eksempel «Kafé Kos», og trykk **Lag klienten**.
+6. Nå ser du `client_id` og `client_secret`. Trykk knappen **Som miljøvariabler**. Den kopierer
+   begge, ferdig til å limes inn i `.env`.
+
+Hemmeligheten vises bare denne ene gangen. Lukker du skuffen før du har kopiert den, lager du en
+ny med **Lag ny hemmelighet** på klienten.
+
+**2. Lim nøklene inn i `.env`.**
 
 ```bash
-cp .env.example .env     # lim inn client_id og client_secret
+cp .env.example .env
 ```
+
+Åpne `.env`, og bytt ut linjene `CLIENT_ID=…` og `CLIENT_SECRET=…` med det du kopierte.
 
 **3. Start kafeen.**
 
@@ -77,7 +88,7 @@ lommeboka nekter å dele det. Ingen rørte mobilen din.
 
 | Du ser | Gjør |
 |---|---|
-| `Fikk ikke token (401)` | Sjekk `EIDAS_CLIENT_ID` og `EIDAS_CLIENT_SECRET` i `.env` |
+| `Fikk ikke token (401)` | Sjekk `CLIENT_ID` og `CLIENT_SECRET` i `.env`. Mistet hemmeligheten? **Lag ny hemmelighet** på klienten i Studio |
 | `Port 3333 er opptatt` | `PORT=3334 npm start` |
 | `403 permission-required` | Klienten mangler en tilgang. Lag den på nytt med formålet «Test og utvikling» |
 | Lommeboka sier nei til kortet | Se meldingen i lommeboka, og den røde linja i *Bak kulissene* |

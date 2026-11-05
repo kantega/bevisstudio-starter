@@ -11,15 +11,16 @@ som sjekker det. Først med Kafé Kos, så med din egen case.
 
 1. **Lag en konto** på [ny.bevisstudio.no](https://ny.bevisstudio.no). Registrer en organisasjon
    hvis du ikke har en. Den gir deg en utsteder og en verifier med det samme.
-2. **Lag en integrasjonsklient.** Bytt til **avansert visning** nederst i menyen, og velg
-   **Integrasjonsklienter → Ny integrasjonsklient**. Formålet er **«Test og utvikling»**.
-   Kopier `client_id` og `client_secret` med en gang. Hemmeligheten vises bare én gang.
+2. **Lag en integrasjonsklient.** Velg **Avansert visning** nederst i menyen, gå til
+   **Integrasjonsklienter** og trykk **Lag integrasjonsklient**. Velg formålet **Test og utvikling**,
+   trykk **Neste**, gi klienten et navn og trykk **Lag klienten**. Trykk knappen
+   **Som miljøvariabler**. Hemmeligheten vises bare én gang.
 3. **Klon starteren.**
    ```bash
    git clone https://github.com/kantega/bevisstudio-starter.git
    cd bevisstudio-starter
    ```
-4. **Lag `.env`** og lim inn nøklene.
+4. **Lag `.env`**, og bytt ut linjene `CLIENT_ID=…` og `CLIENT_SECRET=…` med det du kopierte.
    ```bash
    cp .env.example .env
    ```
