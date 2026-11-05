@@ -217,10 +217,11 @@
         <button class="stille" id="kopierTilbud">Kopier lenka</button>
       </div>
 
-      <p id="lommebokHjelp">Åpne <a href="https://wallet.dev.kantega.id" target="_blank" rel="noopener">wallet.dev.kantega.id</a>
+      <p id="lommebokHjelp">Åpne <strong>Kantega Lommebok</strong> på
+        <a class="lommebok" href="https://wallet.kantega.id" target="_blank" rel="noopener">wallet.kantega.id</a>
         på mobilen. QR-koden dukker opp her når kortet er laget.</p>
       <p class="liten">Uten mobil? Trykk <em>Kopier lenka</em> og lim den inn under
-        <a href="https://wallet.dev.kantega.id/textInputPage" target="_blank" rel="noopener">«Lim inn»</a> i lommeboka.</p>
+        <a class="lommebok" data-sti="/textInputPage" href="https://wallet.kantega.id/textInputPage" target="_blank" rel="noopener">«Lim inn»</a> i lommeboka.</p>
     </article>
 
     <!-- 3. Verifier -->
@@ -292,6 +293,13 @@
       ? `${tekst(s.feil)}<br><span class="liten">Sjekk <code>.env</code> og start på nytt med <code>npm start</code>.</span>`
       : "";
     vis($("stengt"), Boolean(s.feil));
+    if (s.felt) FELT = Object.fromEntries(s.felt.map((f) => [f.navn, f.visning]));
+    if (s.lommebok) {
+      document.querySelectorAll("a.lommebok").forEach((a) => {
+        a.href = s.lommebok + (a.dataset.sti ?? "");
+        if (!a.dataset.sti) a.textContent = new URL(s.lommebok).host;
+      });
+    }
     if (!s.klar) setTimeout(sjekkSkilt, s.feil ? 5000 : 1000);
   }
   sjekkSkilt();
@@ -368,7 +376,8 @@
     MATCHES_REQUEST: "Riktig slags kort",
     CLAIM_CONSTRAINTS: "Verdiene stemmer",
   };
-  const FELT = { navn: "Navn", bursdag: "Bursdag" };
+  // Feltene på kortet, med visningsnavn. Hentes fra serveren (KORT i server.js).
+  let FELT = { navn: "Navn", bursdag: "Bursdag" };
 
   let foresporselLenke = "";
   kopierKnapp($("kopierForesporsel"), () => foresporselLenke);
@@ -405,13 +414,14 @@
   };
 
   function velkommen(svar) {
-    const fikk = svar.delt.map((f) => `<li>${FELT[f] ?? tekst(f)}</li>`).join("");
+    const fikk = svar.delt.map((f) => `<li>${FELT[f] ?? tekst(f)}: <b>${tekst(svar.verdier[f] ?? "")}</b></li>`).join("");
+    const forste = Object.values(svar.verdier)[0];
     const holdt = Object.keys(FELT).filter((f) => !svar.delt.includes(f)).map((f) => `<li>🔒 ${FELT[f]}</li>`).join("");
     const haker = svar.sjekker
       .map((s) => `<li class="${s.utfall === "PASS" ? "" : s.utfall === "FAIL" ? "fail" : "skip"}">${KONTROLLER[s.navn] ?? tekst(s.navn)}</li>`)
       .join("");
     return `
-      <div class="boble ok"><strong>Velkommen, ${tekst(svar.navn)}! 🧇</strong>Vaffelen er din.</div>
+      <div class="boble ok"><strong>Velkommen${forste ? ", " + tekst(forste) : ""}! 🧇</strong>Vaffelen er din.</div>
       <div class="todelt">
         <div><h3>Kassa fikk</h3><ul class="haker">${fikk}</ul></div>
         <div><h3>Ble i lommeboka</h3><ul style="list-style:none;margin:0;padding:0">${holdt || "<li>Ingenting</li>"}</ul></div>

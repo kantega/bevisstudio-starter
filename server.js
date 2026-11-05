@@ -15,14 +15,19 @@ const STUDIO = (process.env.EIDAS_STUDIO_URL ?? "").replace(/\/$/, "");
 const CLIENT_ID = process.env.EIDAS_CLIENT_ID ?? "";
 const CLIENT_SECRET = process.env.EIDAS_CLIENT_SECRET ?? "";
 const PORT = Number(process.env.PORT ?? 3333);
+// Lommeboka gjestene bruker. Bare til lenkene på siden — appen kaller den aldri.
+const LOMMEBOK = (process.env.EIDAS_WALLET_URL ?? "https://wallet.kantega.id").replace(/\/$/, "");
 
 if (!STUDIO || !CLIENT_ID || !CLIENT_SECRET) {
   console.error("\n  Mangler nøklene. Kopier .env.example til .env og fyll inn de tre verdiene.\n");
   process.exit(1);
 }
 
-// ── Kafeens bevis ─────────────────────────────────────────────────────────────────────
-// Kortet har to opplysninger. Kassa ber bare om den ene.
+// ── Casen ─────────────────────────────────────────────────────────────────────────────
+// Bytt disse tre, så har du din egen case. Gi kortet og kassa NYE navn når du endrer feltene:
+// oppsettet finner det som finnes på navnet, og gjenbruker et gammelt kort med gamle felt.
+//
+// dataType: STRING | NUMBER | BOOLEAN | DATE ("ÅÅÅÅ-MM-DD") | IMAGE
 
 const KORT = {
   name: "Stamgjestkort",
@@ -33,6 +38,7 @@ const KORT = {
   ],
 };
 const KASSA = "Kassa på Kafé Kos";
+const SPOR = ["navn"]; // det kassa ber om — be om mindre enn kortet har
 
 // ── Token ─────────────────────────────────────────────────────────────────────────────
 
@@ -114,7 +120,7 @@ async function rigg() {
   const [utsteder] = await studio("GET", "/v1/issuers");
   const [verifier] = await studio("GET", "/v1/verifiers");
   if (!utsteder || !verifier) {
-    throw new Error("Organisasjonen din mangler utsteder eller verifier. Er den registrert i dev.bevisstudio.no?");
+    throw new Error("Organisasjonen din mangler utsteder eller verifier. Er den registrert i ny.bevisstudio.no?");
   }
 
   // Lån Kantegas sandkassesertifikater. Uten dem stopper det først i lommeboka.
@@ -149,7 +155,7 @@ async function rigg() {
             id: "stamgjestkort",
             format: "dc+sd-jwt",
             meta: { vct_values: [deployed.vct] },
-            claims: [{ path: ["navn"] }], // bare navnet — bursdagen blir i lommeboka
+            claims: SPOR.map((felt) => ({ path: [felt] })),
           },
         ],
       },
@@ -163,12 +169,23 @@ async function rigg() {
 
 const qr = (tekst) => QRCode.toString(tekst, { type: "svg", margin: 1, color: { dark: "#3b2418", light: "#0000" } });
 
-async function lagKort({ navn, bursdag }) {
+async function lagKort(skjema) {
+  // Bare feltene kortet har. Tall og ja/nei kommer som tekst fra skjemaet, og må gjøres om.
+  const claims = Object.fromEntries(
+    KORT.claims
+      .filter((c) => skjema[c.name] !== undefined && skjema[c.name] !== "")
+      .map((c) => {
+        const verdi = skjema[c.name];
+        if (c.dataType === "NUMBER") return [c.name, Number(verdi)];
+        if (c.dataType === "BOOLEAN") return [c.name, verdi === true || verdi === "true" || verdi === "on"];
+        return [c.name, verdi];
+      }),
+  );
   const { regelId } = await sorgForOppsett();
   // Ingen Idempotency-Key: er den ikke slått på i miljøet, svarer hvert nøklet kall 503.
   const ordre = await studio("POST", `/v1/issuance-rules/${regelId}/issuance-orders`, {
     format: "dc+sd-jwt",
-    claims: { navn, bursdag },
+    claims,
   });
   return { ordreId: ordre.orderId, lenke: ordre.offerUri, qr: await qr(ordre.offerUri) };
 }
@@ -195,11 +212,16 @@ async function kassaSvar(oktId) {
   if (!["VERIFIED", "REJECTED"].includes(phase)) return { ferdig: false };
   const resultat = await studio("GET", `/v1/verification-sessions/${id}/result`);
   const bevis = resultat.presentations?.[0];
-  const navn = bevis?.claims?.navn;
   return {
     ferdig: true,
     godkjent: resultat.status === "VERIFIED",
-    navn: typeof navn === "string" ? navn : null,
+    // Verdiene kassa fikk, som tekst. Et claim kan være vilkårlig JSON.
+    verdier: Object.fromEntries(
+      SPOR.filter((felt) => felt in (bevis?.claims ?? {})).map((felt) => {
+        const verdi = bevis.claims[felt];
+        return [felt, typeof verdi === "string" ? verdi : JSON.stringify(verdi)];
+      }),
+    ),
     // Bare kortets egne felt. iss, vct, status osv. har alle bevis, og de er ikke poenget her.
     delt: Object.keys(bevis?.claims ?? {}).filter((felt) => KORT.claims.some((c) => c.name === felt)),
     sjekker: (bevis?.checks ?? []).map(({ name, outcome }) => ({ navn: name, utfall: outcome })),
@@ -221,7 +243,11 @@ async function lesKropp(req) {
 }
 
 const ruter = [
-  ["GET", /^\/api\/status$/, () => oppsettStatus],
+  ["GET", /^\/api\/status$/, () => ({
+    ...oppsettStatus,
+    lommebok: LOMMEBOK,
+    felt: KORT.claims.map((c) => ({ navn: c.name, visning: c.displayName ?? c.name })),
+  })],
   ["GET", /^\/api\/logg$/, (req) => {
     const etter = Number(new URL(req.url, "http://x").searchParams.get("etter") ?? 0);
     return logg.filter((rad) => rad.nr > etter);
