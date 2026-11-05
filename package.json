@@ -1,0 +1,14 @@
+{
+  "name": "bevisstudio-starter",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Et stamgjestkort i lommeboka — den minste demoen av Kantegas eIDAS-plattform",
+  "type": "module",
+  "engines": { "node": ">=22.9" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}
