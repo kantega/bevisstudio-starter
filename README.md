@@ -19,7 +19,7 @@ utstederen og verifieren for deg.
 
 - Node 22.9 eller nyere
 - En konto på [ny.bevisstudio.no](https://ny.bevisstudio.no)
-- **Kantega Lommebok** på mobilen: [wallet.kantega.id](https://wallet.kantega.id)
+- **Kantega Lommebok** fra App Store på mobilen
 
 ## Kom i gang
 
@@ -51,9 +51,8 @@ Skiltet øverst på siden står på **Åpen** når alt er klart.
 
 ## Lommeboka
 
-Åpne **Kantega Lommebok** på [wallet.kantega.id](https://wallet.kantega.id) på mobilen, logg inn
-og skann QR-koden. Har du ikke mobil, trykker du **Kopier lenka** og limer den inn i lommeboka i en
-annen fane.
+Vi anbefaler **Kantega Lommebok** fra App Store. Last den ned, logg inn og skann QR-koden.
+Bruk helst ikke nettlommeboka.
 
 ## Bak kulissene
 

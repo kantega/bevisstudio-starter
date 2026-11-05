@@ -3,7 +3,7 @@
 Du skal utstede et digitalt bevis, ta det med deg i **Kantega Lommebok** og vise det fram til noen
 som sjekker det. Først med Kafé Kos, så med din egen case.
 
-**Tid:** ca. 90 minutter. **Du trenger:** en laptop med Node 22.9+, en mobil og en nettleser.
+**Tid:** ca. 90 minutter. **Du trenger:** en laptop med Node 22.9+ og en mobil med Kantega Lommebok fra App Store.
 
 ---
 
@@ -29,7 +29,8 @@ som sjekker det. Først med Kafé Kos, så med din egen case.
    npm start
    ```
    Åpne <http://localhost:3333>. Skiltet øverst skal stå på **Åpen**.
-6. **Åpne Kantega Lommebok** på mobilen: [wallet.kantega.id](https://wallet.kantega.id). Logg inn.
+6. **Last ned Kantega Lommebok** fra App Store, og logg inn. Vi anbefaler appen; bruk helst ikke
+   nettlommeboka.
 
 ✅ **Ferdig når:** skiltet står på Åpen, og du er logget inn i lommeboka.
 
